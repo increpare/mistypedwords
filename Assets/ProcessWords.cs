@@ -17,11 +17,17 @@ public class ProcessWords : MonoBehaviour {
 	
 	}
 
+	//qwerty
 	private string keyboard = "qwertyuiopasdfghjkl;zxcvbnm,./";
-	
-	private int[] keyIndex;
+	//azerty	
+	//private string keyboard = "azertyuiopqsdfghjkl;wxcvbnm,./";
+	//dvorak
+	private string dvorakkeyboard = "'<>pyfgcrlaoeuidhtns;qjkxbmwvz";
 
-	private char TranslateChar(char s, int dx, int dy){
+	private int[] keyIndex;
+	private int[] keyIndexDvorak;
+
+    private char TranslateChar(char s, int dx, int dy){
 		int index = keyIndex [s];
 		int ix = index % 10;
 		int iy = index / 10;
@@ -32,8 +38,27 @@ public class ProcessWords : MonoBehaviour {
 		}
 		return keyboard [ix + iy * 10];
 	}
-
-	private string TranslateWord(string s, int dx, int dy){
+	
+	private string TranslateWordToDvorak(string s){
+		System.Text.StringBuilder newword = new System.Text.StringBuilder (s.Length);
+		for (int i=0; i<s.Length; i++) {
+			var newc = dvorakkeyboard[keyIndex[s[i]]];
+			newword.Append(newc);
+        }
+        return newword.ToString();
+	}
+	
+	private string TranslateWordFromDvorak(string s){
+		System.Text.StringBuilder newword = new System.Text.StringBuilder (s.Length);
+		for (int i=0; i<s.Length; i++) {
+			var newc = keyboard[keyIndexDvorak[s[i]]];
+			newword.Append(newc);
+		}
+		return newword.ToString();
+    }
+    
+    
+    private string TranslateWord(string s, int dx, int dy){
 		System.Text.StringBuilder newword = new System.Text.StringBuilder (s.Length);
 		for (int i=0; i<s.Length; i++) {
 			var newc = TranslateChar(s[i],dx,dy);
@@ -67,29 +92,30 @@ public class ProcessWords : MonoBehaviour {
 		
 		print("populated hashset");
 		yield return 0;
-
-		for (var i=1;i<strings.Length;i++){//strings.Length;i++){
+		
+		string result = "";
+		for (var i=strings.Length-1;i>=1;i--){//strings.Length;i++){
+			result+="\n\nwords of length "+i+"\n";
 			var stringset = strings[i];  
-			string result = "";
 			foreach(var s in stringset){
-				for (int dx=0;dx<9;dx++){
-					for (int dy=-2;dy<3;dy++){
-						if (dx==0&&dy==0){
-							continue;
-						}
+//				for (int dx=0;dx<9;dx++){
+//					for (int dy=-2;dy<3;dy++){
+//						if (dx==0&&dy==0){
+//							continue;
+//						}
 						
-						var w = TranslateWord(s,dx,dy);
-						if (w!=null&&stringset.Contains(w)){
+						var w = TranslateWordToDvorak(s);
+						if (w!=s&&w!=null&&stringset.Contains(w)){
 							result += "\n"+s+" -> " + w;
 						}
-					}
-				}
 
-			}
-			print ("result for length " + i);
-			print (result);
-			yield return 0;
+            }        
+
 		}
+
+		yield return 0;
+			
+		print (result);
 		print ("done");
 		yield break;
 	}
